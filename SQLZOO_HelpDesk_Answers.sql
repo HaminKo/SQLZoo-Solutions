@@ -1,5 +1,6 @@
 /*
 SQLZOO Helpdesk Answers
+Questions available at http://sqlzoo.net/wiki/Help_Desk
 */
 
 
