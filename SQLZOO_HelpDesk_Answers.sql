@@ -411,25 +411,23 @@ FROM
 		SELECT
 			taken_by,
 			call_date AS last_call,
-			@row_number1:=
-			CASE
+			@row_number1:= CASE
 				WHEN
 					TIMESTAMPDIFF(MINUTE, @call_date, call_date) <= 10
 				THEN
 					@row_number1 + 1
 				ELSE
 					1
-			END
-			AS call_count, @first_call_date:=
-			CASE
+			END AS call_count,
+      @first_call_date:= CASE
 				WHEN
 					@row_number1 = 1
 				THEN
 					call_date
 				ELSE
 					@first_call_date
-			END
-			AS first_call, @call_date:= Issue.call_date AS call_date
+			END AS first_call,
+      @call_date:= Issue.call_date AS call_date
 		FROM
 			Issue,
 			(
