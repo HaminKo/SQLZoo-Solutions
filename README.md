@@ -1,2 +1,2 @@
 # SQLZoo-Solutions
-Solutions to challenges on sqlzoo.
+My answers to the assessments available on http://sqlzoo.net/
