@@ -420,7 +420,7 @@ FROM
 				ELSE
 					1
 			END AS call_count,
-      @first_call_date:= CASE
+			@first_call_date:= CASE
 				WHEN
 					@row_number1 = 1
 				THEN
@@ -428,7 +428,7 @@ FROM
 				ELSE
 					@first_call_date
 			END AS first_call,
-      @call_date:= Issue.call_date AS call_date
+			@call_date:= Issue.call_date AS call_date
 		FROM
 			Issue,
 			(
