@@ -231,7 +231,7 @@ GROUP BY
   SalesOrderHeader.SalesOrderID,
   SalesOrderHeader.SubTotal;
 
--- @13
+-- #13
 /*
 Show the best selling item by value.
 */
@@ -350,3 +350,155 @@ WHERE
 GROUP BY
   Address.City,
   ProductCategory.Name;
+
+/*
+Resit Questions
+*/
+
+-- #1
+/*
+List the SalesOrderNumber for the customer 'Good Toys' 'Bike World'
+*/
+SELECT
+  SalesOrderHeader.SalesOrderID,
+  Customer.CompanyName
+FROM
+  Customer
+  LEFT JOIN
+    SalesOrderHeader
+    ON Customer.CustomerID = SalesOrderHeader.CustomerID
+WHERE
+  CompanyName LIKE '%Good Toys%'
+  OR CompanyName LIKE '%Bike World%';
+
+-- #2
+/*
+List the ProductName and the quantity of what was ordered by 'Futuristic Bikes'
+*/
+SELECT
+  Product.Name,
+  SalesOrderDetail.OrderQty
+FROM
+  Customer
+  JOIN
+    SalesOrderHeader
+    ON Customer.CustomerID = SalesOrderHeader.CustomerID
+  JOIN
+    SalesOrderDetail
+    ON SalesOrderHeader.SalesOrderID = SalesOrderDetail.SalesOrderID
+  JOIN
+    Product
+    ON SalesOrderDetail.ProductID = Product.ProductID
+WHERE
+  Customer.CompanyName = 'Futuristic Bikes';
+
+-- #3
+/*
+List the name and addresses of companies containing the word 'Bike' (upper or lower case) and companies containing 'cycle' (upper or lower case). Ensure that the 'bike's are listed before the 'cycles's.
+*/
+SELECT
+  t.CompanyName,
+  Address.AddressLine1,
+  Address.AddressLine2,
+  Address.City,
+  Address.StateProvince,
+  Address.CountyRegion,
+  Address.PostalCode
+FROM
+  (
+    SELECT DISTINCT
+      CustomerID,
+      CompanyName,
+      1 AS 'Rank'
+    FROM
+      Customer
+    WHERE
+      lOWER(CompanyName) LIKE '%bike%'
+    UNION
+    SELECT DISTINCT
+      CustomerID,
+      CompanyName,
+      2 AS 'Rank'
+    FROM
+      Customer
+    WHERE
+      LOWER(CompanyName) LIKE '%cycle%'
+  ) AS t
+  JOIN
+    CustomerAddress
+    ON t.CustomerID = CustomerAddress.CustomerID
+  JOIN
+    Address
+    ON CustomerAddress.AddressID = Address.AddressID
+ORDER BY
+  t.Rank,
+  t.CompanyName;
+
+-- #4
+/*
+Show the total order value for each CountryRegion. List by value with the highest first.
+*/
+SELECT
+  Address.CountyRegion,
+  SUM(SubTotal)
+FROM
+  SalesOrderHeader
+  JOIN
+    Address
+    ON SalesOrderHeader.ShipToAddressID = Address.AddressID
+GROUP BY
+  Address.CountyRegion
+ORDER BY
+  SUM(SubTotal) DESC;
+
+-- #5
+/*
+Find the best customer in each region.
+*/
+SELECT
+  t.CountryRegion,
+  t.CompanyName,
+  t.Total
+FROM
+  (
+    SELECT
+      t.*,
+      @counter := CASE
+        WHEN
+          @CountryRegion = t.CountyRegion
+        THEN
+          @counter + 1
+        ELSE
+          1
+      END AS counter,
+      @CountryRegion := t.CountyRegion AS CountryRegion
+    FROM
+      (
+        SELECT
+          @counter := 0,
+          @CountryRegion := 0
+      ) AS initvar,
+      (
+        SELECT
+          Address.CountyRegion,
+          Customer.CompanyName,
+          SUM(SubTotal) AS 'Total'
+        FROM
+          SalesOrderHeader
+          JOIN
+            Customer
+            ON SalesOrderHeader.CustomerID = Customer.CustomerID
+          JOIN
+            CustomerAddress
+            ON Customer.CustomerID = CustomerAddress.CustomerID
+          JOIN
+            Address
+            ON CustomerAddress.AddressID = Address.AddressID
+        GROUP BY
+          Customer.CompanyName,
+          Address.CountyRegion
+        ORDER BY Address.CountyRegion, SUM(SubTotal) DESC
+      ) AS t
+  ) AS t
+WHERE
+  t.counter = 1;
