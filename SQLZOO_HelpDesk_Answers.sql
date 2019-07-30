@@ -204,41 +204,33 @@ GROUP BY
 Caller 'Harry' claims that the operator who took his most recent call was abusive and insulting. Find out who took the call (full name) and when.
 */
 SELECT
-	Staff.first_name,
-	Staff.last_name,
-	Issue_Max.call_date
+	Staff.First_name,
+	Staff.Last_name,
+	a.Call_date 
 FROM
 	(
 		SELECT
-			b.call_date,
-			b.Taken_by,
-			b.Caller_id
+			Issue.Caller_id,
+			MAX(Call_date) AS Call_date 
 		FROM
-			(
-				SELECT
-					Issue.Caller_id,
-					MAX(Issue.call_date) AS call_date
-				FROM
-					Issue
-				GROUP BY
-					Issue.Caller_id
-			)
-			AS a
+			Issue 
 			JOIN
-				Issue AS b
-				ON a.Caller_id = b.Caller_id
-				AND a.call_date = b.call_date
+				Caller 
+				ON (Issue.Caller_id = Caller.Caller_id) 
+		WHERE
+			Caller.First_name = 'Harry' 
+		GROUP BY
+			Issue.Caller_id
 	)
-	AS Issue_Max
+	AS a 
 	JOIN
-		Staff
-		ON (Staff.Staff_code = Issue_Max.Taken_By)
+		Issue 
+		ON (a.Caller_id = Issue.Caller_id 
+		AND a.Call_date = Issue.Call_date) 
 	JOIN
-		Caller
-		ON (Issue_Max.Caller_id = Caller.Caller_id)
-WHERE
-	Caller.first_name = 'Harry';
-
+		Staff 
+		ON (Issue.Taken_by = Staff.Staff_code)
+		
 -- #11
 /*
 Show the manager and number of calls received for each hour of the day on 2017-08-12
