@@ -221,10 +221,10 @@ SELECT
   SUM(SalesOrderDetail.OrderQty * Product.ListPrice)
 FROM
   SalesOrderHeader
-  JOIN
+  LEFT JOIN
     SalesOrderDetail
     ON SalesOrderHeader.SalesOrderID = SalesOrderDetail.SalesOrderID
-  JOIN
+  LEFT JOIN
     Product
     ON SalesOrderDetail.ProductID = Product.ProductID
 GROUP BY
